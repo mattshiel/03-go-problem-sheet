@@ -4,6 +4,7 @@ import (
   "math/rand"
   "time"
   "fmt"
+  "regexp" // Import Golang's built-in support for regukar expressions
 )
 
 // Array of string responses
@@ -15,7 +16,16 @@ var responses = []string {
 
 //
 func ElizaResponse(input string) string{
-  // Adapted info about Intn from https://stackoverflow.com/questions/33994677/pick-a-random-value-from-a-go-slice
+
+  // regex expression to search case-insensitively for the string "father"
+  // Learned about regex from https://github.com/StefanSchroeder/Golang-Regex-Tutorial/blob/master/01-chapter1.markdown
+  match := regexp.MustCompile(`(?i)\bfather\b`)
+
+  // Match string returns true if the input String matches the "match" String
+  if match.MatchString(input) {
+    return "Why don’t you tell me more about your father?"
+  }
+  // Otherwise we return a random response as before 
   return responses[rand.Intn(len(responses))]
 }
 
