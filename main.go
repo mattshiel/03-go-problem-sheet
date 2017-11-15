@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"regexp" // Import Golang's built-in support for regukar expressions
+	"strings"
 	"time"
 )
 
@@ -14,9 +15,41 @@ var responses = []string{
 	"Why do you say that?",
 }
 
-//
-func ElizaResponse(input string) string {
+func applyPronouns(input string) string {
+	// Fields splits the string input around one or more consecutive white space characters
+	sentence := strings.Fields(input)
 
+	// Map of string to string key-value pairs, to substitute pronouns
+	// List of substitutions adapted from https://www.smallsurething.com/implementing-the-famous-eliza-chatbot-in-python/
+	pronouns := map[string]string{
+		"i":      "you",
+		"was":    "were",
+		"i'd":    "you would",
+		"i've":   "you have",
+		"i'll":   "you will",
+		"my":     "your",
+		"are":    "am",
+		"you've": "I have",
+		"you'll": "I will",
+		"your":   "my",
+		"yours":  "mine",
+		"you":    "I",
+		"me":     "you",
+	}
+
+	// Loop through slice checking at each index if the word is equal to a key in the map
+	// If the word is equal to the map value, change the word to equal the value
+	// Found how to iterate over a map from https://gobyexample.com/range
+	for index, word := range sentence {
+		if value, ok := pronouns[strings.ToLower(word)]; ok {
+				sentence[index] = value;
+		}
+	}
+
+	return strings.Join(sentence, " ")
+}
+
+func ElizaResponse(input string) string {
 	// regex expression to search case-insensitively for the string "father"
 	// Learned about regex from https://github.com/StefanSchroeder/Golang-Regex-Tutorial/blob/master/01-chapter1.markdown
 	match := regexp.MustCompile(`(?i)\bfather\b`)
@@ -26,13 +59,15 @@ func ElizaResponse(input string) string {
 		return "Why don’t you tell me more about your father?"
 	} else {
 		// Use the "|" operator to match groups so as to define seperate submatches
-		match := regexp.MustCompile(`(?i)^(I am|I'm|im)(.*)`)
+		// Escape full stops and question marks
+		match := regexp.MustCompile(`(?i)^(I am|I'm|im) ([^\.\?!]*)`)
 
 		if match.MatchString(input) {
 			// FindStringSubmatch returns a slice of strings
 			// Position 2 will find the subexpressions as defined by the submatch description in the regex
 			captured := match.FindStringSubmatch(input)[2]
-			return fmt.Sprintf("How do you know you are%s?", captured)
+			captured = applyPronouns(captured)
+			return fmt.Sprintf("How do you know you are %s?", captured)
 		}
 	}
 	// Otherwise we return a random response
