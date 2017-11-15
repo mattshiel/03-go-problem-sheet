@@ -25,16 +25,14 @@ func ElizaResponse(input string) string {
 	if match.MatchString(input) {
 		return "Why don’t you tell me more about your father?"
 	} else {
-		// The caret symbol means "position before the first character"
-		// (.*) means any character greedily (zero or more characters)
-		match := regexp.MustCompile(`(?i)^I am (.*)`)
+		// Use the "|" operator to match groups so as to define seperate submatches
+		match := regexp.MustCompile(`(?i)^(I am|I'm|im)(.*)`)
 
 		if match.MatchString(input) {
 			// FindStringSubmatch returns a slice of strings
-			// Position 0 holds the text of the leftmost match of the regular expression
-			// Position 1 holds the matches
-			captured := match.FindStringSubmatch(input)[1]
-			return fmt.Sprintf("How do you know you are %s?", captured)
+			// Position 2 will find the subexpressions as defined by the submatch description in the regex
+			captured := match.FindStringSubmatch(input)[2]
+			return fmt.Sprintf("How do you know you are%s?", captured)
 		}
 	}
 	// Otherwise we return a random response
